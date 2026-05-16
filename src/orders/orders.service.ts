@@ -186,6 +186,15 @@ export class OrdersService {
     });
   }
 
+  // Admin: fetch orders for a specific user (customer detail page)
+  async findByUser(userId: string): Promise<Order[]> {
+    return this.ordersRepository.find({
+      where: { userId },
+      relations: ['items'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
   async findMine(userId: string, query: QueryOrdersDto) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 20;

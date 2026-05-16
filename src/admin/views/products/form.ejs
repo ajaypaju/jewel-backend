@@ -1,0 +1,143 @@
+<%- include('../partials/header', { currentPage: 'products', pageTitle: pageTitle }) %>
+
+<div class="mb-4">
+  <a href="/admin/products" style="color:var(--text-muted);font-size:14px;">← Back to Products</a>
+</div>
+
+<div class="card">
+  <div class="card-title mb-4"><%= pageTitle %></div>
+
+  <form method="POST"
+        action="<%= product ? '/admin/products/' + product.id : '/admin/products' %>"
+        enctype="multipart/form-data">
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="name">Product Name *</label>
+        <input type="text" id="name" name="name" class="form-control" required minlength="2"
+               value="<%= product ? product.name : '' %>" placeholder="e.g. Eternal Elegance Diamond Ring">
+      </div>
+      <div class="form-group">
+        <label for="slug">Slug (auto-generated if blank)</label>
+        <input type="text" id="slug" name="slug" class="form-control"
+               value="<%= product ? product.slug : '' %>" placeholder="e.g. eternal-elegance-diamond-ring">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="description">Description</label>
+      <textarea id="description" name="description" class="form-control" rows="3"
+                placeholder="Product description..."><%= product ? (product.description || '') : '' %></textarea>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="originalPrice">Original Price ($) *</label>
+        <input type="number" id="originalPrice" name="originalPrice" class="form-control" required min="0.01" step="0.01"
+               value="<%= product ? Number(product.originalPrice) : '' %>">
+      </div>
+      <div class="form-group">
+        <label for="salePrice">Sale Price ($)</label>
+        <input type="number" id="salePrice" name="salePrice" class="form-control" min="0.01" step="0.01"
+               value="<%= product && product.salePrice ? Number(product.salePrice) : '' %>">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="categoryId">Category *</label>
+        <select id="categoryId" name="categoryId" class="form-control" required>
+          <option value="">Select category...</option>
+          <% categories.forEach(cat => { %>
+            <option value="<%= cat.id %>" <%= product && product.categoryId === cat.id ? 'selected' : '' %>><%= cat.name %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="stock">Stock *</label>
+        <input type="number" id="stock" name="stock" class="form-control" required min="0"
+               value="<%= product ? product.stock : '0' %>">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="sku">SKU</label>
+        <input type="text" id="sku" name="sku" class="form-control"
+               value="<%= product ? (product.sku || '') : '' %>" placeholder="e.g. RING-001">
+      </div>
+      <div class="form-group">
+        <label for="materials">Materials</label>
+        <input type="text" id="materials" name="materials" class="form-control"
+               value="<%= product ? (product.materials || '') : '' %>" placeholder="e.g. 18k gold, diamond">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="weight">Weight</label>
+        <input type="text" id="weight" name="weight" class="form-control"
+               value="<%= product ? (product.weight || '') : '' %>" placeholder="e.g. 4.2g">
+      </div>
+      <div class="form-group">
+        <label for="sizes">Sizes (comma-separated)</label>
+        <input type="text" id="sizes" name="sizes" class="form-control"
+               value="<%= product && product.sizes ? product.sizes.join(', ') : '' %>" placeholder="e.g. 5, 6, 7, 8, 9, 10">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="tags">Tags (comma-separated)</label>
+      <input type="text" id="tags" name="tags" class="form-control"
+             value="<%= product && product.tags ? product.tags.join(', ') : '' %>" placeholder="e.g. gold, diamond, engagement">
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-check">
+          <input type="checkbox" name="isOnSale" <%= product && product.isOnSale ? 'checked' : '' %>>
+          <span>On Sale</span>
+        </label>
+      </div>
+      <div class="form-group">
+        <label class="form-check">
+          <input type="checkbox" name="isNewArrival" <%= product && product.isNewArrival ? 'checked' : '' %>>
+          <span>New Arrival</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Existing images (edit mode only) -->
+    <% if (product && product.images && product.images.length > 0) { %>
+      <div class="form-group">
+        <label>Current Images</label>
+        <div class="image-grid">
+          <% product.images.forEach(img => { %>
+            <div class="image-remove-wrap">
+              <img src="<%= img %>" alt="Product image">
+              <form method="POST" action="/admin/products/<%= product.id %>/images/delete" style="margin:0;display:inline;"
+                    onsubmit="return confirm('Remove this image?')">
+                <input type="hidden" name="imageUrl" value="<%= img %>">
+                <button type="submit" class="image-remove-btn" title="Remove">&times;</button>
+              </form>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- Upload new images -->
+    <div class="form-group">
+      <label for="images"><%= product ? 'Add More Images' : 'Product Images' %></label>
+      <input type="file" id="images" name="images" class="form-control" multiple accept="image/jpeg,image/png,image/webp">
+      <div class="text-muted text-sm mt-4">JPEG, PNG, or WebP. Max 5MB each, up to 10 files.</div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary"><%= product ? 'Update Product' : 'Create Product' %></button>
+      <a href="/admin/products" class="btn btn-outline">Cancel</a>
+    </div>
+  </form>
+</div>
+
+<%- include('../partials/footer') %>

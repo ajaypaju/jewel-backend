@@ -51,6 +51,17 @@ export class ReviewsService {
     return saved;
   }
 
+  // Admin: all reviews regardless of isApproved, with product and user loaded
+  async findAllAdmin(page = 1, limit = 20) {
+    const [reviews, total] = await this.reviewsRepository.findAndCount({
+      relations: ['user', 'product'],
+      order: { createdAt: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+    return { reviews, total, page, limit, totalPages: Math.ceil(total / limit) };
+  }
+
   async findByProduct(productId: string, page = 1, limit = 20) {
     const [reviews, total] = await this.reviewsRepository.findAndCount({
       where: { productId, isApproved: true },

@@ -1,0 +1,110 @@
+<%- include('../partials/header', { currentPage: 'products', pageTitle: 'Products' }) %>
+
+<div class="card-header mb-4">
+  <div class="card-title" style="font-size:20px;">Products (<%= total %>)</div>
+  <a href="/admin/products/new" class="btn btn-primary">+ Add Product</a>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4" style="padding:12px 16px;">
+  <form method="GET" action="/admin/products" class="d-flex gap-2 align-center" style="flex-wrap:wrap;">
+    <input type="text" name="search" class="form-control" placeholder="Search by name..." value="<%= search %>" style="max-width:250px;">
+    <select name="category" class="form-control" style="max-width:200px;">
+      <option value="">All Categories</option>
+      <% categories.forEach(cat => { %>
+        <option value="<%= cat.slug %>" <%= categorySlug === cat.slug ? 'selected' : '' %>><%= cat.name %></option>
+      <% }) %>
+    </select>
+    <button type="submit" class="btn btn-outline">Filter</button>
+    <% if (search || categorySlug) { %>
+      <a href="/admin/products" class="btn btn-outline">Clear</a>
+    <% } %>
+  </form>
+</div>
+
+<!-- Product Table -->
+<div class="card">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:60px;">Image</th>
+          <th>Name</th>
+          <th>Category</th>
+          <th>Price</th>
+          <th>Stock</th>
+          <th>Status</th>
+          <th style="width:140px;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (products.length === 0) { %>
+          <tr><td colspan="7" class="text-muted" style="text-align:center;padding:24px;">No products found.</td></tr>
+        <% } %>
+        <% products.forEach(p => { %>
+          <tr>
+            <td>
+              <% if (p.images && p.images.length > 0) { %>
+                <img src="<%= p.images[0] %>" class="thumb" alt="<%= p.name %>">
+              <% } else { %>
+                <div class="thumb" style="background:#f1f5f9;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:11px;">No img</div>
+              <% } %>
+            </td>
+            <td>
+              <strong><%= p.name %></strong>
+              <div class="text-muted text-sm"><%= p.slug %></div>
+            </td>
+            <td><%= p.category ? p.category.name : '—' %></td>
+            <td>
+              <% if (p.isOnSale && p.salePrice) { %>
+                <span class="price price-sale">$<%= Number(p.salePrice).toFixed(2) %></span>
+                <span class="price-original">$<%= Number(p.originalPrice).toFixed(2) %></span>
+              <% } else { %>
+                <span class="price">$<%= Number(p.originalPrice).toFixed(2) %></span>
+              <% } %>
+            </td>
+            <td>
+              <% if (p.stock === 0) { %>
+                <span class="badge badge-cancelled">Out of stock</span>
+              <% } else if (p.stock < 5) { %>
+                <span class="badge badge-pending"><%= p.stock %> left</span>
+              <% } else { %>
+                <%= p.stock %>
+              <% } %>
+            </td>
+            <td>
+              <% if (p.isActive) { %>
+                <span class="badge badge-active">Active</span>
+              <% } else { %>
+                <span class="badge badge-inactive">Inactive</span>
+              <% } %>
+              <% if (p.isNewArrival) { %>
+                <span class="badge badge-confirmed" style="margin-left:4px;">New</span>
+              <% } %>
+            </td>
+            <td>
+              <div class="d-flex gap-2">
+                <a href="/admin/products/<%= p.id %>/edit" class="btn btn-outline btn-sm">Edit</a>
+                <form method="POST" action="/admin/products/<%= p.id %>/delete" style="margin:0;" onsubmit="return confirm('Deactivate this product?')">
+                  <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <% if (totalPages > 1) { %>
+    <div class="pagination">
+      <% for (let i = 1; i <= totalPages; i++) { %>
+        <% const qs = new URLSearchParams({ page: String(i), search, category: categorySlug }).toString(); %>
+        <a href="/admin/products?<%= qs %>" class="<%= i === page ? 'active' : '' %>"><%= i %></a>
+      <% } %>
+    </div>
+  <% } %>
+</div>
+
+<%- include('../partials/footer') %>

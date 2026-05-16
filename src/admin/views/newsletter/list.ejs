@@ -1,0 +1,39 @@
+<%- include('../partials/header', { currentPage: 'newsletter', pageTitle: 'Newsletter' }) %>
+
+<div class="card-header mb-4">
+  <div class="card-title" style="font-size:20px;">Newsletter Subscribers (<%= subscribers.length %>)</div>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Email</th>
+          <th>Status</th>
+          <th>Subscribed</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (subscribers.length === 0) { %>
+          <tr><td colspan="3" class="text-muted" style="text-align:center;padding:24px;">No subscribers yet.</td></tr>
+        <% } %>
+        <% subscribers.forEach(s => { %>
+          <tr>
+            <td><%= s.email %></td>
+            <td>
+              <% if (s.isActive) { %>
+                <span class="badge badge-active">Active</span>
+              <% } else { %>
+                <span class="badge badge-inactive">Unsubscribed</span>
+              <% } %>
+            </td>
+            <td class="text-muted text-sm"><%= new Date(s.subscribedAt).toLocaleDateString() %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

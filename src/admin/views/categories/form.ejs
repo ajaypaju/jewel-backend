@@ -1,0 +1,51 @@
+<%- include('../partials/header', { currentPage: 'categories', pageTitle: pageTitle }) %>
+
+<div class="mb-4">
+  <a href="/admin/categories" style="color:var(--text-muted);font-size:14px;">← Back to Categories</a>
+</div>
+
+<div class="card">
+  <div class="card-title mb-4"><%= pageTitle %></div>
+
+  <form method="POST" action="<%= category ? '/admin/categories/' + category.id : '/admin/categories' %>">
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="name">Category Name *</label>
+        <input type="text" id="name" name="name" class="form-control" required minlength="2"
+               value="<%= category ? category.name : '' %>" placeholder="e.g. Rings">
+      </div>
+      <div class="form-group">
+        <label for="slug">Slug (auto-generated if blank)</label>
+        <input type="text" id="slug" name="slug" class="form-control"
+               value="<%= category ? category.slug : '' %>" placeholder="e.g. rings">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="description">Description</label>
+      <textarea id="description" name="description" class="form-control" rows="3"
+                placeholder="Category description..."><%= category ? (category.description || '') : '' %></textarea>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="image">Image URL</label>
+        <input type="text" id="image" name="image" class="form-control"
+               value="<%= category ? (category.image || '') : '' %>" placeholder="https://example.com/category-image.jpg">
+      </div>
+      <div class="form-group">
+        <label for="sortOrder">Sort Order</label>
+        <input type="number" id="sortOrder" name="sortOrder" class="form-control" min="0"
+               value="<%= category ? category.sortOrder : '0' %>">
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary"><%= category ? 'Update Category' : 'Create Category' %></button>
+      <a href="/admin/categories" class="btn btn-outline">Cancel</a>
+    </div>
+  </form>
+</div>
+
+<%- include('../partials/footer') %>

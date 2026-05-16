@@ -23,7 +23,7 @@ import { User } from '../users/entities/user.entity.js';
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
-  // --- User endpoints (scoped to current user) ---
+  // --- User endpoints ---
 
   @UseGuards(JwtAuthGuard)
   @Post('orders')
@@ -55,25 +55,28 @@ export class OrdersController {
     return this.ordersService.cancelOrder(user.id, id);
   }
 
-  // --- Admin endpoints ---
+  // --- Admin API endpoints ---
+  // Path uses 'manage/orders' (not 'admin/orders') to avoid collision with
+  // the EJS admin panel routes which occupy the /admin/* namespace.
+  // Final URLs: /api/manage/orders, /api/manage/orders/:id, /api/manage/orders/:id/status
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
-  @Get('admin/orders')
+  @Get('manage/orders')
   findAll(@Query() query: QueryOrdersDto) {
     return this.ordersService.findAll(query);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
-  @Get('admin/orders/:id')
+  @Get('manage/orders/:id')
   findOneAdmin(@Param('id', ParseUUIDPipe) id: string) {
     return this.ordersService.findOneAdmin(id);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
-  @Patch('admin/orders/:id/status')
+  @Patch('manage/orders/:id/status')
   updateStatus(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateOrderStatusDto,

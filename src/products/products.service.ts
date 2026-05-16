@@ -139,6 +139,23 @@ export class ProductsService {
     };
   }
 
+  // Returns { categoryId: count } map in ONE query — avoids N+1 when displaying
+  // product counts on the admin categories page.
+  async countByCategory(): Promise<Record<string, number>> {
+    const results = await this.productsRepository
+      .createQueryBuilder('product')
+      .select('product.categoryId', 'categoryId')
+      .addSelect('COUNT(*)', 'count')
+      .where('product.isActive = true')
+      .groupBy('product.categoryId')
+      .getRawMany();
+    const counts: Record<string, number> = {};
+    for (const r of results) {
+      counts[r.categoryId] = parseInt(r.count, 10);
+    }
+    return counts;
+  }
+
   async countActive(): Promise<number> {
     return this.productsRepository.count({ where: { isActive: true } });
   }
@@ -149,6 +166,31 @@ export class ProductsService {
       order: { stock: 'ASC' },
       take: 10,
     }).then(products => products.filter(p => p.stock < threshold));
+  }
+
+  // Admin list: includes inactive products, supports search + category filter + pagination
+  async findAllAdmin(query: { search?: string; categorySlug?: string; page?: number; limit?: number }) {
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 20;
+
+    const qb = this.productsRepository
+      .createQueryBuilder('product')
+      .leftJoinAndSelect('product.category', 'category');
+
+    if (query.categorySlug) {
+      qb.andWhere('category.slug = :categorySlug', { categorySlug: query.categorySlug });
+    }
+
+    if (query.search) {
+      qb.andWhere('product.name ILIKE :search', { search: `%${query.search}%` });
+    }
+
+    qb.orderBy('product.createdAt', 'DESC')
+      .skip((page - 1) * limit)
+      .take(limit);
+
+    const [items, total] = await qb.getManyAndCount();
+    return { items, total, page, limit, totalPages: Math.ceil(total / limit) };
   }
 
   // Find by ID INCLUDING inactive (for admin)
@@ -231,13 +273,13 @@ export class ProductsService {
   // --- Image management ---
 
   async addImages(id: string, imageUrls: string[]): Promise<Product> {
-    const product = await this.findOne(id);
+    const product = await this.findOneAdmin(id);
     product.images = [...product.images, ...imageUrls];
     return this.productsRepository.save(product);
   }
 
   async removeImage(id: string, imageUrl: string): Promise<Product> {
-    const product = await this.findOne(id);
+    const product = await this.findOneAdmin(id);
 
     if (!product.images.includes(imageUrl)) {
       throw new NotFoundException('Image URL not found on this product');

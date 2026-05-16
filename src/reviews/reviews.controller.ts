@@ -84,7 +84,7 @@ export class ReviewsController {
   // PATCH /api/admin/reviews/:id/moderate — admin only
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
-  @Patch('admin/reviews/:id/moderate')
+  @Patch('manage/reviews/:id/moderate')
   moderate(
     @Param('id', ParseUUIDPipe) id: string,
     @Body('isApproved') isApproved: boolean,

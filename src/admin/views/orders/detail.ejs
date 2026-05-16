@@ -1,0 +1,155 @@
+<%- include('../partials/header', { currentPage: 'orders', pageTitle: 'Order Detail' }) %>
+
+<div class="mb-4">
+  <a href="/admin/orders" style="color:var(--text-muted);font-size:14px;">← Back to Orders</a>
+</div>
+
+<!-- Order header -->
+<div class="card mb-4">
+  <div class="d-flex justify-between align-center" style="flex-wrap:wrap;gap:12px;">
+    <div>
+      <div style="font-size:18px;font-weight:700;">Order #<%= order.id.substring(0, 8) %>…</div>
+      <div class="text-muted text-sm" title="<%= order.id %>">Full ID: <%= order.id %></div>
+      <div class="text-muted text-sm">Placed: <%= new Date(order.createdAt).toLocaleString() %></div>
+    </div>
+    <div class="d-flex gap-2">
+      <span class="badge badge-<%= order.status %>" style="font-size:14px;padding:6px 16px;"><%= order.status.toUpperCase() %></span>
+      <span class="badge badge-<%= order.paymentStatus %>" style="font-size:14px;padding:6px 16px;">Payment: <%= order.paymentStatus %></span>
+    </div>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;">
+  <div>
+    <!-- Line items (snapshots — NOT live product data) -->
+    <div class="card mb-4">
+      <div class="card-title mb-2">Items</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th style="width:50px;"></th><th>Product</th><th>Size</th><th>Qty</th><th>Price</th><th>Subtotal</th></tr>
+          </thead>
+          <tbody>
+            <% order.items.forEach(item => { %>
+              <tr>
+                <td>
+                  <% if (item.image) { %>
+                    <img src="<%= item.image %>" class="thumb thumb-sm" alt="<%= item.name %>">
+                  <% } else { %>
+                    <div class="thumb thumb-sm" style="background:#f1f5f9;"></div>
+                  <% } %>
+                </td>
+                <td>
+                  <strong><%= item.name %></strong>
+                  <div class="text-muted text-sm">ID: <%= item.productId.substring(0, 8) %>…</div>
+                </td>
+                <td><%= item.size || '—' %></td>
+                <td><%= item.quantity %></td>
+                <td>$<%= Number(item.price).toFixed(2) %></td>
+                <td class="price">$<%= (Number(item.price) * item.quantity).toFixed(2) %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Update status form -->
+    <div class="card">
+      <div class="card-title mb-2">Update Status</div>
+      <form method="POST" action="/admin/orders/<%= order.id %>/status" class="d-flex gap-2 align-center" style="flex-wrap:wrap;">
+        <select name="status" class="form-control" style="max-width:200px;">
+          <% statuses.forEach(s => { %>
+            <option value="<%= s %>" <%= order.status === s ? 'selected' : '' %>><%= s.charAt(0).toUpperCase() + s.slice(1) %></option>
+          <% }) %>
+        </select>
+        <input type="text" name="trackingNumber" class="form-control" placeholder="Tracking number (optional)"
+               value="<%= order.trackingNumber || '' %>" style="max-width:250px;">
+        <button type="submit" class="btn btn-primary">Update</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Right column: customer, address, totals -->
+  <div>
+    <!-- Customer -->
+    <div class="card mb-4">
+      <div class="card-title mb-2">Customer</div>
+      <% if (order.user) { %>
+        <div><strong><%= order.user.name %></strong></div>
+        <div class="text-muted text-sm"><%= order.user.email %></div>
+        <div class="text-muted text-sm">Role: <span class="badge badge-<%= order.user.role %>"><%= order.user.role %></span></div>
+      <% } else { %>
+        <div class="text-muted">User deleted</div>
+      <% } %>
+    </div>
+
+    <!-- Shipping address (JSONB snapshot) -->
+    <div class="card mb-4">
+      <div class="card-title mb-2">Shipping Address</div>
+      <% const addr = order.shippingAddress; %>
+      <% if (addr) { %>
+        <div><strong><%= addr.fullName %></strong></div>
+        <div><%= addr.street %></div>
+        <div><%= addr.city %>, <%= addr.state %> <%= addr.zip %></div>
+        <div><%= addr.country %></div>
+        <% if (addr.phone) { %><div class="text-muted text-sm">Phone: <%= addr.phone %></div><% } %>
+      <% } else { %>
+        <div class="text-muted">No address on file</div>
+      <% } %>
+    </div>
+
+    <!-- Totals (display stored values — no recomputation) -->
+    <div class="card mb-4">
+      <div class="card-title mb-2">Totals</div>
+      <div style="font-size:14px;">
+        <div class="d-flex justify-between" style="padding:4px 0;">
+          <span>Subtotal</span><span>$<%= Number(order.subtotal).toFixed(2) %></span>
+        </div>
+        <div class="d-flex justify-between" style="padding:4px 0;">
+          <span>Shipping</span><span>$<%= Number(order.shipping).toFixed(2) %></span>
+        </div>
+        <div class="d-flex justify-between" style="padding:4px 0;">
+          <span>Tax</span><span>$<%= Number(order.tax).toFixed(2) %></span>
+        </div>
+        <% if (Number(order.discount) > 0) { %>
+          <div class="d-flex justify-between" style="padding:4px 0;color:var(--success);">
+            <span>Discount</span><span>-$<%= Number(order.discount).toFixed(2) %></span>
+          </div>
+        <% } %>
+        <hr style="margin:8px 0;border-color:var(--border);">
+        <div class="d-flex justify-between" style="padding:4px 0;font-weight:700;font-size:16px;">
+          <span>Total</span><span>$<%= Number(order.total).toFixed(2) %></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Extra info -->
+    <div class="card">
+      <div class="card-title mb-2">Details</div>
+      <div style="font-size:13px;">
+        <div class="d-flex justify-between" style="padding:3px 0;">
+          <span class="text-muted">Payment method</span><span><%= order.paymentMethod %></span>
+        </div>
+        <% if (order.couponCode) { %>
+          <div class="d-flex justify-between" style="padding:3px 0;">
+            <span class="text-muted">Coupon</span><span><%= order.couponCode %></span>
+          </div>
+        <% } %>
+        <% if (order.trackingNumber) { %>
+          <div class="d-flex justify-between" style="padding:3px 0;">
+            <span class="text-muted">Tracking</span><span><%= order.trackingNumber %></span>
+          </div>
+        <% } %>
+        <% if (order.notes) { %>
+          <div style="padding:3px 0;">
+            <span class="text-muted">Notes:</span>
+            <div><%= order.notes %></div>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

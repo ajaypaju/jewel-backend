@@ -1,0 +1,80 @@
+<%- include('../partials/header', { currentPage: 'reviews', pageTitle: 'Reviews' }) %>
+
+<div class="card-header mb-4">
+  <div class="card-title" style="font-size:20px;">Reviews (<%= total %>)</div>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Reviewer</th>
+          <th>Rating</th>
+          <th>Comment</th>
+          <th>Verified</th>
+          <th>Status</th>
+          <th>Date</th>
+          <th style="width:160px;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (reviews.length === 0) { %>
+          <tr><td colspan="8" class="text-muted" style="text-align:center;padding:24px;">No reviews yet.</td></tr>
+        <% } %>
+        <% reviews.forEach(r => { %>
+          <tr>
+            <td><%= r.product ? r.product.name.substring(0, 25) + (r.product.name.length > 25 ? '…' : '') : 'Deleted' %></td>
+            <td>
+              <% if (r.user) { %>
+                <div><%= r.user.name %></div>
+                <div class="text-muted text-sm"><%= r.user.email %></div>
+              <% } else { %>
+                <span class="text-muted">Deleted user</span>
+              <% } %>
+            </td>
+            <td><%= '★'.repeat(r.rating) %><%= '☆'.repeat(5 - r.rating) %></td>
+            <td class="text-sm"><%= r.comment.substring(0, 60) %><%= r.comment.length > 60 ? '…' : '' %></td>
+            <td>
+              <% if (r.isVerified) { %>
+                <span class="badge badge-delivered">Verified</span>
+              <% } else { %>
+                <span class="badge badge-pending">Unverified</span>
+              <% } %>
+            </td>
+            <td>
+              <% if (r.isApproved) { %>
+                <span class="badge badge-active">Approved</span>
+              <% } else { %>
+                <span class="badge badge-inactive">Hidden</span>
+              <% } %>
+            </td>
+            <td class="text-muted text-sm"><%= new Date(r.createdAt).toLocaleDateString() %></td>
+            <td>
+              <div class="d-flex gap-2">
+                <form method="POST" action="/admin/reviews/<%= r.id %>/moderate" style="margin:0;">
+                  <input type="hidden" name="isApproved" value="<%= r.isApproved ? 'false' : 'true' %>">
+                  <button type="submit" class="btn btn-outline btn-sm"><%= r.isApproved ? 'Hide' : 'Approve' %></button>
+                </form>
+                <form method="POST" action="/admin/reviews/<%= r.id %>/delete" style="margin:0;" onsubmit="return confirm('Delete this review?')">
+                  <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+  <% if (totalPages > 1) { %>
+    <div class="pagination">
+      <% for (let i = 1; i <= totalPages; i++) { %>
+        <a href="/admin/reviews?page=<%= i %>" class="<%= i === page ? 'active' : '' %>"><%= i %></a>
+      <% } %>
+    </div>
+  <% } %>
+</div>
+
+<%- include('../partials/footer') %>

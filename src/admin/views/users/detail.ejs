@@ -1,0 +1,68 @@
+<%- include('../partials/header', { currentPage: 'users', pageTitle: 'Customer Detail' }) %>
+
+<div class="mb-4">
+  <a href="/admin/users" style="color:var(--text-muted);font-size:14px;">← Back to Customers</a>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+  <!-- Profile -->
+  <div class="card">
+    <div class="card-title mb-2">Profile</div>
+    <div style="font-size:14px;">
+      <div class="d-flex justify-between" style="padding:4px 0;"><span class="text-muted">Name</span><strong><%= user.name %></strong></div>
+      <div class="d-flex justify-between" style="padding:4px 0;"><span class="text-muted">Email</span><span><%= user.email %></span></div>
+      <div class="d-flex justify-between" style="padding:4px 0;"><span class="text-muted">Phone</span><span><%= user.phone || '—' %></span></div>
+      <div class="d-flex justify-between" style="padding:4px 0;"><span class="text-muted">Tier</span><span><%= user.tier %></span></div>
+      <div class="d-flex justify-between" style="padding:4px 0;"><span class="text-muted">Status</span>
+        <span class="badge badge-<%= user.isActive ? 'active' : 'inactive' %>"><%= user.isActive ? 'Active' : 'Inactive' %></span>
+      </div>
+      <div class="d-flex justify-between" style="padding:4px 0;"><span class="text-muted">Joined</span><span><%= new Date(user.createdAt).toLocaleDateString() %></span></div>
+    </div>
+  </div>
+
+  <!-- Role management -->
+  <div class="card">
+    <div class="card-title mb-2">Role</div>
+    <div class="mb-4">
+      Current: <span class="badge badge-<%= user.role %>" style="font-size:14px;padding:4px 12px;"><%= user.role.toUpperCase() %></span>
+    </div>
+    <form method="POST" action="/admin/users/<%= user.id %>/role" class="d-flex gap-2 align-center">
+      <select name="role" class="form-control" style="max-width:150px;">
+        <option value="user" <%= user.role === 'user' ? 'selected' : '' %>>User</option>
+        <option value="admin" <%= user.role === 'admin' ? 'selected' : '' %>>Admin</option>
+      </select>
+      <button type="submit" class="btn btn-primary btn-sm">Update Role</button>
+    </form>
+  </div>
+</div>
+
+<!-- Order history -->
+<div class="card mt-4">
+  <div class="card-header">
+    <div class="card-title">Order History (<%= orders.length %>)</div>
+  </div>
+  <% if (orders.length === 0) { %>
+    <p class="text-muted">No orders yet.</p>
+  <% } else { %>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Order</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th></tr>
+        </thead>
+        <tbody>
+          <% orders.forEach(order => { %>
+            <tr>
+              <td><a href="/admin/orders/<%= order.id %>"><%= order.id.substring(0, 8) %>…</a></td>
+              <td><%= order.items ? order.items.length : 0 %></td>
+              <td class="price">$<%= Number(order.total).toFixed(2) %></td>
+              <td><span class="badge badge-<%= order.status %>"><%= order.status %></span></td>
+              <td class="text-muted text-sm"><%= new Date(order.createdAt).toLocaleDateString() %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</div>
+
+<%- include('../partials/footer') %>

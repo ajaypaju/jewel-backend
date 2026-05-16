@@ -32,28 +32,28 @@ export class CouponsController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
-  @Get('admin/coupons')
+  @Get('manage/coupons')
   findAll() {
     return this.couponsService.findAll();
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
-  @Post('admin/coupons')
+  @Post('manage/coupons')
   create(@Body() dto: CreateCouponDto) {
     return this.couponsService.create(dto);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
-  @Patch('admin/coupons/:id')
+  @Patch('manage/coupons/:id')
   update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateCouponDto) {
     return this.couponsService.update(id, dto);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
-  @Delete('admin/coupons/:id')
+  @Delete('manage/coupons/:id')
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.couponsService.remove(id);
   }

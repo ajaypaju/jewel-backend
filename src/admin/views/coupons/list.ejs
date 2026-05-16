@@ -1,0 +1,60 @@
+<%- include('../partials/header', { currentPage: 'coupons', pageTitle: 'Coupons' }) %>
+
+<div class="card-header mb-4">
+  <div class="card-title" style="font-size:20px;">Coupons (<%= coupons.length %>)</div>
+  <a href="/admin/coupons/new" class="btn btn-primary">+ Add Coupon</a>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Type</th>
+          <th>Value</th>
+          <th>Min Order</th>
+          <th>Usage</th>
+          <th>Status</th>
+          <th>Expires</th>
+          <th style="width:140px;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (coupons.length === 0) { %>
+          <tr><td colspan="8" class="text-muted" style="text-align:center;padding:24px;">No coupons yet.</td></tr>
+        <% } %>
+        <% coupons.forEach(c => { %>
+          <tr>
+            <td><strong><%= c.code %></strong></td>
+            <td><span class="badge badge-confirmed"><%= c.type %></span></td>
+            <td><%= c.type === 'percent' ? Number(c.value) + '%' : '$' + Number(c.value).toFixed(2) %></td>
+            <td><%= c.minOrder ? '$' + Number(c.minOrder).toFixed(2) : '—' %></td>
+            <td><%= c.usedCount %><%= c.maxUses ? ' / ' + c.maxUses : '' %></td>
+            <td>
+              <% if (c.isActive) { %>
+                <span class="badge badge-active">Active</span>
+              <% } else { %>
+                <span class="badge badge-inactive">Inactive</span>
+              <% } %>
+              <% if (c.expiresAt && new Date(c.expiresAt) < new Date()) { %>
+                <span class="badge badge-cancelled">Expired</span>
+              <% } %>
+            </td>
+            <td class="text-muted text-sm"><%= c.expiresAt ? new Date(c.expiresAt).toLocaleDateString() : 'Never' %></td>
+            <td>
+              <div class="d-flex gap-2">
+                <a href="/admin/coupons/<%= c.id %>/edit" class="btn btn-outline btn-sm">Edit</a>
+                <form method="POST" action="/admin/coupons/<%= c.id %>/delete" style="margin:0;" onsubmit="return confirm('Delete this coupon?')">
+                  <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
