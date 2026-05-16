@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lumina Admin</title>
+  <link rel="stylesheet" href="/static/admin/admin.css">
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar">
+    <div class="sidebar-brand">Lumina <span>Admin</span></div>
+    <ul class="sidebar-nav">
+      <li><a href="/admin" class="<%= currentPage === 'dashboard' ? 'active' : '' %>"><span class="icon">📊</span> Dashboard</a></li>
+      <li><a href="/admin/products" class="<%= currentPage === 'products' ? 'active' : '' %>"><span class="icon">💎</span> Products</a></li>
+      <li><a href="/admin/categories" class="<%= currentPage === 'categories' ? 'active' : '' %>"><span class="icon">📁</span> Categories</a></li>
+      <li><a href="/admin/orders" class="<%= currentPage === 'orders' ? 'active' : '' %>"><span class="icon">📦</span> Orders</a></li>
+      <li><a href="/admin/reviews" class="<%= currentPage === 'reviews' ? 'active' : '' %>"><span class="icon">⭐</span> Reviews</a></li>
+      <li><a href="/admin/coupons" class="<%= currentPage === 'coupons' ? 'active' : '' %>"><span class="icon">🏷️</span> Coupons</a></li>
+      <li><a href="/admin/users" class="<%= currentPage === 'users' ? 'active' : '' %>"><span class="icon">👥</span> Customers</a></li>
+      <li><a href="/admin/newsletter" class="<%= currentPage === 'newsletter' ? 'active' : '' %>"><span class="icon">📧</span> Newsletter</a></li>
+    </ul>
+    <div style="padding: 16px 24px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: auto;">
+      <form action="/admin/logout" method="POST" style="margin:0;">
+        <button type="submit" class="btn btn-outline" style="width:100%; color:#cbd5e1; border-color:rgba(255,255,255,0.2);">Logout</button>
+      </form>
+    </div>
+  </nav>
+
+  <div class="main-content">
+    <div class="topbar">
+      <div class="topbar-title"><%= typeof pageTitle !== 'undefined' ? pageTitle : 'Dashboard' %></div>
+      <div class="topbar-user">
+        <span><%= admin.name %></span>
+        <span class="badge badge-admin">Admin</span>
+      </div>
+    </div>
+    <div class="content">
+      <% if (typeof flash !== 'undefined' && flash) { %>
+        <div class="flash flash-<%= flash.type %>"><%= flash.message %></div>
+      <% } %>

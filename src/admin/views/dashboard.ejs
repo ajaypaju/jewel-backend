@@ -1,0 +1,84 @@
+<%- include('partials/header', { currentPage: 'dashboard', pageTitle: 'Dashboard' }) %>
+
+<div class="stats-grid">
+  <div class="card stat-card">
+    <div class="stat-value"><%= stats.productCount %></div>
+    <div class="stat-label">Active Products</div>
+  </div>
+  <div class="card stat-card">
+    <div class="stat-value"><%= stats.categoryCount %></div>
+    <div class="stat-label">Categories</div>
+  </div>
+  <div class="card stat-card">
+    <div class="stat-value"><%= stats.orderCount %></div>
+    <div class="stat-label">Total Orders</div>
+  </div>
+  <div class="card stat-card">
+    <div class="stat-value"><%= stats.userCount %></div>
+    <div class="stat-label">Customers</div>
+  </div>
+  <div class="card stat-card">
+    <div class="stat-value">$<%= Number(stats.revenue).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></div>
+    <div class="stat-label">Total Revenue</div>
+  </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px;">
+  <!-- Recent Orders -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Recent Orders</div>
+      <a href="/admin/orders" class="btn btn-outline btn-sm">View All</a>
+    </div>
+    <% if (recentOrders.length === 0) { %>
+      <p class="text-muted">No orders yet.</p>
+    <% } else { %>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Order</th><th>Customer</th><th>Total</th><th>Status</th><th>Date</th></tr></thead>
+        <tbody>
+          <% recentOrders.forEach(order => { %>
+          <tr>
+            <td><a href="/admin/orders/<%= order.id %>"><%= order.id.substring(0, 8) %>…</a></td>
+            <td><%= order.user ? order.user.email : 'N/A' %></td>
+            <td class="price">$<%= Number(order.total).toFixed(2) %></td>
+            <td><span class="badge badge-<%= order.status %>"><%= order.status %></span></td>
+            <td class="text-muted text-sm"><%= new Date(order.createdAt).toLocaleDateString() %></td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    <% } %>
+  </div>
+
+  <!-- Order Status + Low Stock -->
+  <div>
+    <div class="card mb-4">
+      <div class="card-title mb-2">Orders by Status</div>
+      <% const statuses = ['pending','confirmed','shipped','delivered','cancelled','returned']; %>
+      <% statuses.forEach(s => { %>
+        <div class="d-flex justify-between align-center" style="padding: 4px 0;">
+          <span class="badge badge-<%= s %>"><%= s %></span>
+          <span class="text-sm"><%= stats.ordersByStatus[s] || 0 %></span>
+        </div>
+      <% }) %>
+    </div>
+
+    <div class="card">
+      <div class="card-title mb-2">Low Stock Alert</div>
+      <% if (lowStock.length === 0) { %>
+        <p class="text-muted text-sm">All products well stocked.</p>
+      <% } else { %>
+        <% lowStock.forEach(p => { %>
+          <div class="d-flex justify-between align-center" style="padding: 4px 0; font-size: 13px;">
+            <span><%= p.name.substring(0, 25) %><%= p.name.length > 25 ? '…' : '' %></span>
+            <span class="badge <%= p.stock === 0 ? 'badge-cancelled' : 'badge-pending' %>"><%= p.stock %> left</span>
+          </div>
+        <% }) %>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

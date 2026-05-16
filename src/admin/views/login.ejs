@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lumina Admin — Login</title>
+  <link rel="stylesheet" href="/static/admin/admin.css">
+</head>
+<body>
+<div class="login-page">
+  <div class="login-card">
+    <div class="login-brand">Lumina <span>Admin</span></div>
+    <div class="login-subtitle">Sign in to manage your store</div>
+
+    <% if (error) { %>
+      <div class="login-error"><%= error %></div>
+    <% } %>
+
+    <form action="/admin/login" method="POST">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" class="form-control" placeholder="admin@lumina.com" required autofocus>
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" class="form-control" placeholder="Your password" required>
+      </div>
+      <button type="submit" class="btn btn-primary w-full" style="justify-content: center;">Sign In</button>
+    </form>
+  </div>
+</div>
+</body>
+</html>
